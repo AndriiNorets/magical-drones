@@ -1,17 +1,29 @@
 from magical_drones.datasets.magmap import MagMapV1
-from torchvision import transforms
+import torchvision.transforms.v2 as transforms
+from torchvision.transforms.v2 import RandomHorizontalFlip, RandomCrop, Resize, ToTensor
 
 if __name__ == "__main__":
-    
-    data_link = "Kiwinicki/sat2map_poland"
+    data_link = "czarna-magia/mag-map"
     batch_size = 32
-    transform = transforms.Compose([
-            transforms.ToTensor(),  
-        ])
+
+    train_transform = transforms.Compose([
+        RandomCrop(size=(224, 224)),
+        RandomHorizontalFlip(p=0.5),
+        ToTensor()  
+    ])
+
+    test_transform = transforms.Compose([
+        Resize(size=(224, 224)),
+        ToTensor()  
+    ])
     
     magmap = MagMapV1(data_link, 
-                      batch_size=batch_size,
-                      transform=transform)
+                      batch_size=batch_size, 
+                      train_transform=train_transform, 
+                      test_transform=test_transform)
+
+    print("Preparing data...")
+    magmap.prepare_data()
 
     print("Setting up datasets...")
     magmap.setup()
@@ -20,26 +32,19 @@ if __name__ == "__main__":
     train_loader = magmap.train_dataloader()
     for i, batch in enumerate(train_loader):
         print(f"Batch {i + 1}: {batch}")
-        if i == 2: 
+        if i == 2:
             break
 
-    print("\nTesting val_dataloader...")
+    print("Testing val_dataloader...")
     val_loader = magmap.val_dataloader()
     for i, batch in enumerate(val_loader):
         print(f"Batch {i + 1}: {batch}")
-        if i == 2: 
+        if i == 2:
             break
 
-    print("\nTesting test_dataloader...")
+    print("Testing test_dataloader...")
     test_loader = magmap.test_dataloader()
     for i, batch in enumerate(test_loader):
         print(f"Batch {i + 1}: {batch}")
-        if i == 2:  
-            break
-
-    for i, batch in enumerate(train_loader):
-        print(f"Batch {i + 1}:")
-        print(f"  sat_image shape: {batch['sat_image'].shape}")
-        print(f"  map_image shape: {batch['map_image'].shape}")
         if i == 2:
             break
